@@ -1,12 +1,17 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #ff8600;
+  --foreground: #ff8600;
+}
+
+*, ::before, ::after {
+  margin: 0;
+  box-sizing: border-box;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #FFF8F1;
+    --foreground: #FFF8F1;
   }
 }
 
@@ -14,6 +19,7 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  font-size: 80%;
 }
 
 body {
@@ -28,6 +34,10 @@ body {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+}
+
+button {
+  background: #FF7D00;
 }
 
 a {

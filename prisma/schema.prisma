@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Account and Session Models (same as your existing setup)
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+  oauth_token_secret String?
+  oauth_token        String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// User Model with a relation to UserRole
+model User {
+  id            String      @id @default(cuid())
+  name          String?
+  email         String?     @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  phone         String?
+  password      String?
+  restaurant    Restaurant? @relation(fields: [restaurantId], references: [id])
+  restaurantId  Int?
+  orders        Order[] // one-to-many relation with Order model
+  userRole      Int? @unique
+  userRoles     UserRole?    @relation(fields: [userRole], references: [id])
+}
+
+// Dynamic Role Model
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  permissions RolePermission[] // Relation to RolePermission
+  UserRole    UserRole[] // Users associated with this role
+}
+
+model Permission {
+  id      Int    @id @default(autoincrement())
+  action  String // e.g., 'updateUser', 'deleteUser'
+  subject String // e.g., 'User', 'Order'
+
+  roles RolePermission[] // Relation to RolePermission
+}
+
+model RolePermission {
+  id           Int @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId]) // Ensure a role can only have a permission once
+}
+
+// Join Table for User and Role (Dynamic Role Assignment)
+model UserRole {
+  id           Int         @id @default(autoincrement())
+  // userId       String
+  roleId       Int
+  restaurantId Int?
+  user         User[]
+  role         Role        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, restaurantId]) // Composite unique key to ensure user has unique role per restaurant
+}
+
+// Restaurant Model
+model Restaurant {
+  id       Int        @id @default(autoincrement())
+  name     String
+  location String
+  pizzas   Pizza[] // one-to-many relation with Pizza model
+  users    User[] // one-to-many relation with User model
+  orders   Order[] // one-to-many relation with Order model
+  logo     String
+  UserRole UserRole[]
+}
+
+// Pizza Model
+model Pizza {
+  id           Int            @id @default(autoincrement())
+  name         String
+  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id])
+  restaurantId Int
+  toppings     PizzaTopping[]
+  orderItems   OrderItem[]
+}
+
+// Topping Model
+model Topping {
+  id               Int                @id @default(autoincrement())
+  name             String
+  pizzas           PizzaTopping[] // many-to-many relation with Pizza model
+  OrderItemTopping OrderItemTopping[]
+}
+
+// Many-to-many join table for Pizza and Topping
+model PizzaTopping {
+  pizzaId   Int
+  toppingId Int
+  pizza     Pizza   @relation(fields: [pizzaId], references: [id])
+  topping   Topping @relation(fields: [toppingId], references: [id])
+
+  @@id([pizzaId, toppingId]) // Composite primary key for the join table
+}
+
+// Order Model
+model Order {
+  id           Int         @id @default(autoincrement())
+  status       OrderStatus @default(PREPARING)
+  user         User        @relation(fields: [userId], references: [id])
+  userId       String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+  restaurantId Int
+  orderItems   OrderItem[]
+  date         DateTime    @default(now())
+}
+
+// Order Item Model
+model OrderItem {
+  id       Int                @id @default(autoincrement())
+  quantity Int
+  order    Order              @relation(fields: [orderId], references: [id])
+  orderId  Int
+  pizza    Pizza              @relation(fields: [pizzaId], references: [id])
+  pizzaId  Int
+  toppings OrderItemTopping[]
+}
+
+// Many-to-many join table for OrderItem and Topping
+model OrderItemTopping {
+  orderItemId Int
+  toppingId   Int
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+  topping     Topping   @relation(fields: [toppingId], references: [id])
+
+  @@id([orderItemId, toppingId]) // Composite primary key for the join table
+}
+
+// Enum for Order Status
+enum OrderStatus {
+  PREPARING
+  READY
+  DELIVERED
+}
