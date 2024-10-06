@@ -59,11 +59,7 @@ export async function defineAbilityFor(user?: User | null, id?: string | null) {
         permissions.forEach((permission) => {
             can(permission.action, permission.subject);
         })
-<<<<<<< HEAD
-        console.log(permissions)
-=======
         // console.log(permissions)
->>>>>>> f7e1f16 (Remove secret key)
         return build();
 
     }
