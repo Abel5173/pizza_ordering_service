@@ -21,16 +21,8 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Pizza Ordering App",
   description: "Order pizza online",
-  title: "Pizza Ordering App",
-  description: "Order pizza online",
 };
 
-export default async function RootLayout(
-  { children,}: Readonly<{children: React.ReactNode;}>
-  
-) {
-  const session = await getSession();
-  console.log("Session from layout", session);
 
 export default async function RootLayout(
   { children,}: Readonly<{children: React.ReactNode;}>
