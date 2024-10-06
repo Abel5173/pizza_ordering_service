@@ -10,7 +10,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Link from 'next/link';
 import GoogleSignInButton from '../GoogleSignInButton';
 import { z } from 'zod';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Error from './error';
 import InputField from './inputfield';
@@ -50,24 +50,26 @@ function SignInForm() {
     });
   };
 
-  const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-    const signInData = await signIn('credentials', {
-      email: values.email,
-      password: values.password,
-      redirect: false,
-    });
+  const onSubmit: SubmitHandler<z.infer<typeof FormSchema>> = async (values) => {
+    console.log("Form values", values); // Log before any async calls
+    try {
+      const signInData = await signIn('credentials', {
+        email: values.email,
+        password: values.password,
+        redirect: false,
+      });
 
-    console.log(values);
-    if (signInData?.error) {
-      console.log(signInData?.error)
-    } else {
-      const role = sessionStorage.getItem('role');
-      if (role === 'CUSTOMER') {
+      console.log("values after signIn call"); // Log after the async call
+      if (signInData?.error) {
+        console.log(signInData?.error)
+      } else {
+        const role = sessionStorage.getItem('role');
+        console.log("Role", role);
         router.refresh();
-        router.push('/');
+        router.push('/dashboard/admin');
       }
-      router.refresh();
-      router.push('/admin');
+    } catch (error) {
+      console.error("Error in onSubmit function:", error); // Log the error
     }
   };
 

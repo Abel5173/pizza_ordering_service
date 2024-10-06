@@ -4,6 +4,11 @@ import localFont from "next/font/local";
 import "./globals.css";
 import NavBar from '@/components/navbar';
 import Footer from '@/components/footer';
+<<<<<<< HEAD
+=======
+import Providers from './providers';
+import { getSession } from 'next-auth/react';
+>>>>>>> f7e1f16 (Remove secret key)
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,12 +26,15 @@ export const metadata: Metadata = {
   description: "Order pizza online",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function RootLayout(
+  { children,}: Readonly<{children: React.ReactNode;}>
+  
+) {
+  const session = await getSession();
+  console.log("Session from layout", session);
+
   return (
+<<<<<<< HEAD
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
@@ -40,5 +48,22 @@ export default function RootLayout({
         </AppRouterCacheProvider>
       </body>
     </html>
+=======
+    <Providers session={session}>
+      <html lang="en">
+        <head>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="icon" href="/favicon.ico" sizes="any" />
+          <link rel="stylesheet" href="/fonts/fonts.css" />
+        </head>
+        <body suppressHydrationWarning={true} className={`${geistSans.variable} ${geistMono.variable}`}>
+            <AppRouterCacheProvider>
+              {children}
+            </AppRouterCacheProvider>
+        </body>
+      </html>
+    </Providers>
+>>>>>>> f7e1f16 (Remove secret key)
   );
 }

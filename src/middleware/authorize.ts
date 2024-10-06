@@ -9,6 +9,10 @@ export async function authorize(req: NextRequest) {
     const publicRoutes = ['/api/auth', '/sign-in', '/sign-up', '/'];
 
     if(publicRoutes.some(route => req.nextUrl.pathname.startsWith(route))) {
+<<<<<<< HEAD
+=======
+        console.log('Public route:', req.nextUrl.pathname);
+>>>>>>> f7e1f16 (Remove secret key)
         return NextResponse.next();
     }
 
